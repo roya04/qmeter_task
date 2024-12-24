@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo:6.0
+    container_name: my_mongo
+    volumes:
+      - mongodata:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 123456
+    restart: always
+
+  web:
+    build: .
+    container_name: my_django_app
+
+    command: gunicorn myproject.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"  
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=27017
+      - DB_NAME=mydb
+      - DB_USER=root
+      - DB_PASSWORD=123456
+    restart: always
+
+volumes:
+  mongodata:
